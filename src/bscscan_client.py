@@ -5,7 +5,8 @@ import requests
 class BscscanClient:
     def __init__(self, api_key: str):
         self.api_key = api_key
-        self.base_url = "https://api.bscscan.com/api"
+        # Actualizado a API V2 de Bscscan
+        self.base_url = "https://api.bscscan.com/v2/api"
         self._last_call = 0.0
         self._min_interval = 0.25  # 4 calls/seg (margen sobre limite de 5)
 
@@ -18,9 +19,13 @@ class BscscanClient:
     def _get(self, params: dict) -> dict:
         self._rate_limit()
         params["apikey"] = self.api_key
+        # chainid 56 es obligatorio para la API V2 de Bscscan
+        params["chainid"] = "56"
+        
         resp = requests.get(self.base_url, params=params, timeout=30)
         resp.raise_for_status()
         data = resp.json()
+        
         if data.get("status") == "0" and data.get("message") != "No transactions found":
             raise RuntimeError(f"Bscscan error: {data.get('message')} - {data.get('result')}")
         return data
