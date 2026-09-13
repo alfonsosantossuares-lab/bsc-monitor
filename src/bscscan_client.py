@@ -6,7 +6,7 @@ class BscscanClient:
     def __init__(self, api_key: str):
         self.api_key = api_key
         # Actualizado a API V2 de Bscscan
-        self.base_url = "https://api.bscscan.com/v2/api"
+        self.base_url = "https://api.etherscan.io/v2/api"
         self._last_call = 0.0
         self._min_interval = 0.25  # 4 calls/seg (margen sobre limite de 5)
 
