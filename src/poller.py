@@ -1,17 +1,12 @@
 import json
 import os
-import sys
 from datetime import datetime, timezone
-from pathlib import Path
-
 from .config import load_addresses, load_tagbook, get_env
 from .bscscan_client import BscscanClient
 from .alerter import TelegramAlerter
 from .models import Movement
 
-
 STATE_FILE = "state/last_block.json"
-
 
 def load_state() -> dict:
     if os.path.exists(STATE_FILE):
@@ -19,14 +14,12 @@ def load_state() -> dict:
             return json.load(f)
     return {"last_block": 0, "addresses": {}}
 
-
 def save_state(state: dict):
     os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
     with open(STATE_FILE, "w") as f:
         json.dump(state, f, indent=2)
 
-
-def parse_transfer(tx: dict, monitored_address: str, tagbook: dict) -> Movement:
+def parse_transfer(tx: dict, monitored_address: str, monitored_label: str, tagbook: dict) -> Movement:
     from_addr = tx["from"].lower()
     to_addr = tx["to"].lower()
     monitored = monitored_address.lower()
@@ -49,27 +42,24 @@ def parse_transfer(tx: dict, monitored_address: str, tagbook: dict) -> Movement:
         contract=tx.get("contractAddress", "").lower(),
         direction=direction,
         monitored_address=monitored,
+        monitored_label=monitored_label,  # <-- NUEVO
         counterparty=counterparty,
         counterparty_label=counterparty_label,
     )
 
-
 def run():
     print(f"[{datetime.now(timezone.utc)}] Starting poll...")
 
-    # Cargar config
     global_config, addresses = load_addresses()
     tagbook = load_tagbook()
     state = load_state()
 
-    # Inicializar clientes
     client = BscscanClient(api_key=get_env("BSCSCAN_API_KEY"))
     alerter = TelegramAlerter(
         bot_token=get_env("TELEGRAM_BOT_TOKEN"),
         chat_id=get_env("TELEGRAM_CHAT_ID"),
     )
 
-    # Obtener ultimo bloque de la red
     latest_block = client.get_latest_block()
     print(f"Latest BSC block: {latest_block}")
 
@@ -79,12 +69,11 @@ def run():
         addr_lower = addr.address.lower()
         last_block = state.get("addresses", {}).get(addr_lower, 0)
 
-        # Si es la primera vez, empezar desde 5000 bloques atras (~4 horas)
         if last_block == 0:
             last_block = latest_block - 5000
             print(f"  [{addr.label}] First run, starting from block {last_block}")
         else:
-            last_block += 1  # No repetir el ultimo bloque procesado
+            last_block += 1
 
         if last_block > latest_block:
             print(f"  [{addr.label}] No new blocks to process")
@@ -99,18 +88,20 @@ def run():
             continue
 
         print(f"  [{addr.label}] Found {len(transfers)} USDT transfers")
-
         threshold = addr.effective_threshold(global_config["default_threshold_usdt"])
 
         for tx in transfers:
-            movement = parse_transfer(tx, addr_lower, tagbook)
+            movement = parse_transfer(tx, addr_lower, addr.label, tagbook)
+            
+            # 🌟 NUEVO: Consultar el saldo de la contraparte antes de alertar
+            movement.counterparty_balance_usdt = client.get_usdt_balance(movement.counterparty)
+            
             all_movements.append(movement)
 
             if movement.value_usdt >= threshold:
                 print(f"    🚨 ALERT: {movement.direction} {movement.value_usdt:,.2f} USDT")
                 alerter.send_alert(movement, threshold)
 
-        # Actualizar estado
         if "addresses" not in state:
             state["addresses"] = {}
         state["addresses"][addr_lower] = latest_block
@@ -120,7 +111,6 @@ def run():
 
     print(f"[{datetime.now(timezone.utc)}] Poll complete. {len(all_movements)} total movements.")
 
-    # Guardar movimientos del dia para el reporte
     if all_movements:
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         daily_file = f"state/daily_{today}.json"
@@ -150,7 +140,6 @@ def run():
             json.dump(existing, f, indent=2)
 
     return all_movements
-
 
 if __name__ == "__main__":
     run()
