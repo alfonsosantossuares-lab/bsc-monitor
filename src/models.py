@@ -1,5 +1,17 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Optional
+
+@dataclass
+class Address:
+    address: str
+    label: str
+    threshold_usdt: Optional[float] = None
+
+    def effective_threshold(self, default: float) -> float:
+        """Devuelve el umbral específico de esta dirección, o el global si no tiene."""
+        return self.threshold_usdt if self.threshold_usdt is not None else default
+
 
 @dataclass
 class Movement:
