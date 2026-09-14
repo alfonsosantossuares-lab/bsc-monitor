@@ -1,7 +1,6 @@
 import requests
 from .models import Movement
 
-
 class TelegramAlerter:
     def __init__(self, bot_token: str, chat_id: str):
         self.bot_token = bot_token
@@ -10,25 +9,26 @@ class TelegramAlerter:
 
     def send_alert(self, movement: Movement, threshold: float) -> bool:
         direction_emoji = "📥" if movement.direction == "in" else "📤"
-        direction_text = "RECEPCION" if movement.direction == "in" else "ENVIO"
-
-        counterparty_display = (
-            movement.counterparty_label
-            if movement.counterparty_label
-            else f"{movement.counterparty[:10]}...{movement.counterparty[-6:]}"
-        )
+        direction_text = "RECEPCIÓN" if movement.direction == "in" else "ENVÍO"
+        
+        # Determinar el rol de la contraparte
+        role = "📤 Origen (Envió a tu wallet)" if movement.direction == "in" else "📥 Destino (Recibió de tu wallet)"
+        
+        # Formatear el saldo de la contraparte
+        balance_str = f"{movement.counterparty_balance_usdt:,.2f} USDT" if movement.counterparty_balance_usdt > 0 else "0.00 USDT"
 
         message = (
             f"🚨 *Movimiento USDT Detectado*\n"
             f"\n"
-            f"{direction_emoji} *{direction_text}*\n"
-            f"📍 Cuenta: {movement.monitored_address[:10]}...{movement.monitored_address[-6:]}\n"
-            f"🏷️ Label: {movement.counterparty_label or 'Sin etiqueta'}\n"
-            f"💰 Monto: *{movement.value_usdt:,.2f} USDT*\n"
-            f"👤 Contraparte: `{counterparty_display}`\n"
-            f"⛓️ Tx: [Ver en Bscscan](https://bscscan.com/tx/{movement.tx_hash})\n"
-            f"🧱 Bloque: {movement.block_number}\n"
-            f"🕐 {movement.timestamp.strftime('%Y-%m-%d %H:%M UTC')}\n"
+            f"📍 *Tu Wallet:* {movement.monitored_label} (`{movement.monitored_address}`)\n"
+            f"💰 *Monto:* {movement.value_usdt:,.2f} USDT\n"
+            f"⏰ *Hora:* {movement.timestamp.strftime('%Y-%m-%d %H:%M UTC')}\n"
+            f"\n"
+            f"{role}:\n"
+            f"🏷️ Dirección completa: `{movement.counterparty}`\n"
+            f"💎 Saldo actual de esa dirección: *{balance_str}*\n"
+            f"\n"
+            f"🔗 *Transacción:* [Ver en Bscscan](https://bscscan.com/tx/{movement.tx_hash})\n"
             f"⚠️ Umbral superado: {threshold:,.0f} USDT"
         )
 
