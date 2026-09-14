@@ -1,6 +1,6 @@
 {
   "global_config": {
-    "default_threshold_usdt": 10000,
+    "default_threshold_usdt": 50,
     "token_contract": "0x55d398326f99059fF7754852469990354080808a",
     "token_symbol": "USDT",
     "token_decimals": 18
@@ -13,12 +13,12 @@
     },
     {
       "address": "0x2CE33c9B550963B33d3BD71E6e709906178A9B10",
-      "label": "Direccion 2",
+      "label": "K",
       "threshold_usdt": null
     },
     {
       "address": "0xaee4F41F8cAF26B1C7ba1057BcC83d50d2E24a0a",
-      "label": "Direccion 3",
+      "label": "G",
       "threshold_usdt": null
     }
   ]
