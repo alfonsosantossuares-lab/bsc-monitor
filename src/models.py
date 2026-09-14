@@ -1,19 +1,5 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
-
-
-@dataclass
-class Address:
-    address: str
-    label: str
-    threshold_usdt: Optional[float] = None
-
-    def effective_threshold(self, global_threshold: float) -> float:
-        if self.threshold_usdt is not None:
-            return self.threshold_usdt
-        return global_threshold
-
 
 @dataclass
 class Movement:
@@ -27,18 +13,7 @@ class Movement:
     contract: str
     direction: str
     monitored_address: str
+    monitored_label: str               # <-- NUEVO: Para mostrar "K", "G", etc.
     counterparty: str
-    counterparty_label: Optional[str] = None
-
-
-@dataclass
-class DailyReport:
-    date: str
-    movements: list[Movement] = field(default_factory=list)
-    alerts_triggered: list[Movement] = field(default_factory=list)
-
-    def total_received(self) -> float:
-        return sum(m.value_usdt for m in self.movements if m.direction == "in")
-
-    def total_sent(self) -> float:
-        return sum(m.value_usdt for m in self.movements if m.direction == "out")
+    counterparty_label: str
+    counterparty_balance_usdt: float = 0.0  # <-- NUEVO: Saldo de la contraparte
