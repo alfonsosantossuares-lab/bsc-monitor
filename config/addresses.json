@@ -1,25 +1,25 @@
-{
-  "global_config": {
-    "default_threshold_usdt": 20,
-    "token_contract": "0x55d398326f99059fF775485246999027B3197955",
-    "token_symbol": "USDT",
-    "token_decimals": 18
-  },
-  "addresses": [
-    {
-      "address": "0x99ECF94A5F9d93C41Bc7695C3dc8a4cB78E8ff55",
-      "label": "Direccion principal",
-      "threshold_usdt": null
-    },
-    {
-      "address": "0x2CE33c9B550963B33d3BD71E6e709906178A9B10",
-      "label": "K",
-      "threshold_usdt": null
-    },
-    {
-      "address": "0xaee4F41F8cAF26B1C7ba1057BcC83d50d2E24a0a",
-      "label": "G",
-      "threshold_usdt": null
-    }
-  ]
-}
+   {
+     "global_config": {
+       "default_threshold_usdt": 20,
+       "token_contract": "0x55d398326f99059fF775485246999027B3197955",
+       "token_symbol": "USDT",
+       "token_decimals": 18
+     },
+     "addresses": [
+       {
+         "address": "0x99ECF94A5F9d93C41Bc7695C3dc8a4cB78E8ff55",
+         "label": "Direccion principal",
+         "threshold_usdt": null
+       },
+       {
+         "address": "0x2CE33c9B550963B33d3BD71E6e709906178A9B10",
+         "label": "K",
+         "threshold_usdt": null
+       },
+       {
+         "address": "0xaee4F41F8cAF26B1C7ba1057BcC83d50d2E24a0a",
+         "label": "G",
+         "threshold_usdt": null
+       }
+     ]
+   }
