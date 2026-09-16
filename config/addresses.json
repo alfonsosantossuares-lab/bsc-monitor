@@ -1,7 +1,7 @@
 {
   "global_config": {
     "default_threshold_usdt": 20,
-    "token_contract": "0x55d398326f99059fF7754852469990354080808a",
+    "token_contract": "0x55d398326f99059fF775485246999027B3197955",
     "token_symbol": "USDT",
     "token_decimals": 18
   },
